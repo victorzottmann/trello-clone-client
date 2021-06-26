@@ -8,6 +8,7 @@ import {
   TextField,
   CircularProgress
 } from '@material-ui/core'
+import Alert from '@material-ui/lab/Alert'
 
 import './App.css'
 import { api } from './data'
@@ -18,11 +19,12 @@ function App() {
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [loading, setLoading] = useState(true)
+  const [errorMessage, setErrorMessage] = useState("")
 
   useEffect(() => {
-    api.get('/cards')
+    api.get('/cardsd')
       .then(({ data }) => setCards(data))
-      .catch((err) => console.log(err))
+      .catch((err) => setErrorMessage(`Something went wrong: ${err.message}`))
       .finally(setLoading(false))
   }, [])
 
@@ -60,23 +62,25 @@ function App() {
     }
   }
 
-  const handleTextChange = (event, setter) => {
+  const handleTextChange = (event, stateSetter) => {
     // run the input through the validator function
     const textInput = event.target.value
     if (validateInput(textInput)) {
-      setter(textInput)
+      stateSetter(textInput)
     } else {
       alert('That is a naughty word!')
     }
     // if valid, update state
     // if invalid, throw an error
-    setter(event.target.value)
+    stateSetter(event.target.value)
   }
 
   return (
     <Box>
       <Typography component="h1" variant="h4">trello clone</Typography>
+      {errorMessage && <Alert severity="error">{errorMessage}</Alert>}
       {loading && <CircularProgress />}
+
       {cards.map(({ title, description, id }) => (
         <Box key={id}>
           <Card variant="outlined">
