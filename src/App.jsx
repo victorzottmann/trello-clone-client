@@ -8,8 +8,10 @@ import {
   TextField,
   CircularProgress,
   FormHelperText,
+  IconButton,
 } from '@material-ui/core'
-import Alert from '@material-ui/lab/Alert'
+import { Alert } from '@material-ui/lab'
+import { Delete } from '@material-ui/icons'
 
 import './App.css'
 import { api } from './data'
@@ -74,6 +76,27 @@ function App() {
     }
   }
 
+  const deleteCard = async (id, index) => {
+    // set loading state
+    setLoading(true)
+
+    try {
+      // send DELETE request to delete path on backend
+      // pass in the ID
+      await api.delete(`/cards/${id}`)
+      // remove the card from the react state
+      const remainingCards = [...cards]
+      remainingCards.splice(index, 1)
+      setCards(remainingCards)
+      //
+    } catch ({ message }) {
+      setErrorMessage(message)
+    } finally {
+      setLoading(false)
+    }
+    // unset loading state
+  }
+
   return (
     <Box>
       <Typography component="h1" variant="h4">
@@ -82,12 +105,15 @@ function App() {
       {errorMessage && <Alert severity="error">{errorMessage}</Alert>}
       {loading && <CircularProgress />}
 
-      {cards.map(({ title, description, id }) => (
+      {cards.map(({ title, description, id }, index) => (
         <Box key={id}>
           <Card variant="outlined">
             <CardContent>
               <Typography>title: {title}</Typography>
               <Typography>description: {description}</Typography>
+              <IconButton onClick={() => deleteCard(id, index)}>
+                <Delete />
+              </IconButton>
             </CardContent>
           </Card>
         </Box>
