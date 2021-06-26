@@ -6,6 +6,7 @@ import {
   Card,
   CardContent,
   TextField,
+  CircularProgress
 } from '@material-ui/core'
 
 import './App.css'
@@ -16,13 +17,18 @@ function App() {
   const [cards, setCards] = useState([])
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    api.get('/cards').then(({ data }) => setCards(data))
+    api.get('/cards')
+      .then(({ data }) => setCards(data))
+      .catch((err) => console.log(err))
+      .finally(setLoading(false))
   }, [])
 
   const addCard = async (event) => {
     event.preventDefault()
+    setLoading(true)
 
     // send a POST request to add the card to the backend
     try {
@@ -49,6 +55,8 @@ function App() {
       setCards(cardsClone)
     } catch (err) {
       console.log('oops, something went wrong:', err)
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -67,7 +75,8 @@ function App() {
 
   return (
     <Box>
-      <Typography>trello clone</Typography>
+      <Typography component="h1" variant="h4">trello clone</Typography>
+      {loading && <CircularProgress />}
       {cards.map(({ title, description, id }) => (
         <Box key={id}>
           <Card variant="outlined">
