@@ -6,7 +6,8 @@ import {
   Card,
   CardContent,
   TextField,
-  CircularProgress
+  CircularProgress,
+  FormHelperText,
 } from '@material-ui/core'
 import Alert from '@material-ui/lab/Alert'
 
@@ -19,14 +20,25 @@ function App() {
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [loading, setLoading] = useState(true)
-  const [errorMessage, setErrorMessage] = useState("")
+  const [errorMessage, setErrorMessage] = useState('')
+  const [titleValid, setTitleValid] = useState(true)
+  const [descriptionValid, setDescriptionValid] = useState(true)
 
   useEffect(() => {
-    api.get('/cardsd')
+    api
+      .get('/cards')
       .then(({ data }) => setCards(data))
       .catch((err) => setErrorMessage(`Something went wrong: ${err.message}`))
       .finally(setLoading(false))
   }, [])
+
+  useEffect(() => {
+    setTitleValid(validateInput(title))
+  }, [title])
+
+  useEffect(() => {
+    setDescriptionValid(validateInput(description))
+  }, [description])
 
   const addCard = async (event) => {
     event.preventDefault()
@@ -62,22 +74,11 @@ function App() {
     }
   }
 
-  const handleTextChange = (event, stateSetter) => {
-    // run the input through the validator function
-    const textInput = event.target.value
-    if (validateInput(textInput)) {
-      stateSetter(textInput)
-    } else {
-      alert('That is a naughty word!')
-    }
-    // if valid, update state
-    // if invalid, throw an error
-    stateSetter(event.target.value)
-  }
-
   return (
     <Box>
-      <Typography component="h1" variant="h4">trello clone</Typography>
+      <Typography component="h1" variant="h4">
+        trello clone
+      </Typography>
       {errorMessage && <Alert severity="error">{errorMessage}</Alert>}
       {loading && <CircularProgress />}
 
@@ -94,18 +95,25 @@ function App() {
 
       <form onSubmit={addCard}>
         <TextField
-          onChange={(e) => handleTextChange(e, setTitle)}
+          error={!titleValid}
+          onChange={(event) => setTitle(event.target.value)}
           value={title}
           id="title"
           label="Title"
         />
         <TextField
-          onChange={(e) => handleTextChange(e, setDescription)}
+          error={!descriptionValid}
+          onChange={(event) => setDescription(event.target.value)}
           value={description}
           id="description"
           label="Description"
         />
-        <Button type="submit">Add card</Button>
+        <Button disabled={!titleValid || !descriptionValid} type="submit">
+          Add card
+        </Button>
+        <FormHelperText error={!titleValid || !descriptionValid}>
+          Please don't use any naughty words
+        </FormHelperText>
       </form>
     </Box>
   )
