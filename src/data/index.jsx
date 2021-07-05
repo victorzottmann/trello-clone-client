@@ -1,13 +1,17 @@
 import axios from 'axios'
 
-let apiUrl
- 
-if (process.env.NODE_ENV === "production") {
-  apiUrl = "https://afternoon-mesa-95200.herokuapp.com/"
-} else {
-  apiUrl = process.env.REACT_APP_API_URL
+export const setApiUrl = () => {
+  if (process.env.NODE_ENV === 'production') {
+    return 'https://afternoon-mesa-95200.herokuapp.com'
+  }
+
+  if (process.env.NODE_ENV === 'development') {
+    return process.env.REACT_APP_API_URL || 'http://localhost:4000'
+  }
 }
 
+const apiUrl = setApiUrl()
+
 export const api = axios.create({
-  baseURL: apiUrl
+  baseURL: apiUrl,
 })
